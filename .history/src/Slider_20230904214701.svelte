@@ -1,0 +1,38 @@
+<svelte:head>
+	<link rel="stylesheet" href="https://bootswatch.com/5/spacelab/bootstrap.min.css" />
+</svelte:head>
+<script>
+	import {Input, Label, Styles} from 'sveltestrap'
+	function createId(){
+		let id=""
+		for (let i=0;i<10;i++) {
+			const char = Math.floor(Math.random()*51)+40
+			id+=String.fromCharCode(char)
+		}
+	}
+	const id = createId()
+	export let min,max,step,ticks,value,label
+</script>
+
+<div class="ps-3 pe-3">
+	<Label for={id} >{label}</Label>
+	<Input class="p-0" {id} type="range" {min} {max} {step} bind:value={value}/>
+	<div class="marks">{#each ticks as _}| {/each}</div> 
+	<div class="ticks">{#each ticks as tick}{tick} {/each}</div>
+</div>
+
+<style>
+	.ticks, .marks
+	{
+		margin: -5px 2px 0px 2px;
+		font-size: 0.8em;
+		line-height: 1.5em;
+		text-align: justify;
+		text-align-last: justify;
+	}
+	.marks{
+		margin-top: -10px;
+		font-size: 0.5em;
+	}
+	
+</style>
