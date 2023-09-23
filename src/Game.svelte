@@ -4,24 +4,26 @@
   import PriceIndicator from "./PriceIndicator.svelte";
   import Condition from "./Condition.svelte";
   import IntersectionObserver from "svelte-intersection-observer";
-
-  const price = (Math.round(game.GMPrice * 100) / 100).toFixed(2);
-  const rating = Math.round(game.rating * 10) / 10;
-  const count = game.items.length;
-  let show = false, intersecting, element;
+  let price, rating, count, show = false, intersecting, element;
+  $: {
+    price = (Math.round(game.GMPrice * 100) / 100).toFixed(2);
+    rating = Math.round(game.rating * 10) / 10;
+    count = game.items.length;  
+  }
+  
 </script>
 {#if visible}
-  <!-- <IntersectionObserver {element} bind:intersecting threshold={0}> -->
-    <!-- {@const normalClasses="game card shadow p-3"} -->
-    <div class="game card shadow p-3">
-      <!-- {#if intersecting} -->
+  <IntersectionObserver {element} bind:intersecting threshold={0}>
+    {@const normalClasses="game card shadow p-3"}
+    <div class={visible?normalClasses:""} bind:this={element}>
+      {#if intersecting}
         <!-- HEADER -->
         <img src={game.thumbnail} class="thumbnail" alt="thumbnail" />
         <div class="name title">
           <div class="nameContent">
             <span>
               <a href="{base_url}/{game.type}/{game.id}" target="_blank" title={game.name}>{game.name}</a>
-              ({game.items.length} items)
+              <span>({game.items.length} items)</span>
             </span>
           </div>
         </div>
@@ -36,13 +38,13 @@
           <div class="offers">
             <div class="title">Price</div>
             <div class="title">Bids</div>
-            <div class="title">Language</div>
+            <div class="title">Language</div> 
             <div class="title">Condition</div>
 
             {#each game.items as item}
             {@const consts = {
-            url: `${base_url}/geeklist/${geeklist}?itemid=${item.entry_id}`,
-            language: item.language == null ? "" : item.language,
+              url: `${base_url}/geeklist/${geeklist}?itemid=${item.entry_id}`,
+              language: item.language == null ? "" : item.language,
             }}
             <div class="price">
               <PriceIndicator avgPrice={game.GMPrice} price={item.price} sold={item.sold} />
@@ -60,9 +62,9 @@
         <div class="showhide">
           <Button color="primary" block size="sm" on:click={()=>{show=!show}}>{show ? "Hide" : "Show"} Offers</Button>
         </div>
-      <!-- {/if} -->
+      {/if}
       </div>
-    <!-- </IntersectionObserver> -->
+    </IntersectionObserver>
 {/if}
 <style>
   .sold {
@@ -112,6 +114,10 @@
     justify-content: center; 
     text-align: left;
     white-space: normal;   
+  }
+
+  .nameContent>span>span{
+    white-space: nowrap;
   }
   
   .offers {

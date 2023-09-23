@@ -2,29 +2,14 @@
 		import 'bootswatch/dist/spacelab/bootstrap.min.css';
 		import Game from './Game.svelte'
 		import Slider from './Slider.svelte'
-		import {Navbar,NavbarBrand,Nav,NavItem,Input, Button, Offcanvas, Card} from 'sveltestrap'
+		import {Navbar,NavbarBrand,Nav,NavItem,Input, Button, Offcanvas} from 'sveltestrap'
 		import { onDestroy } from "svelte";
-		import { decodeArrayStream } from "@msgpack/msgpack";
+		//import { decodeArrayStream } from "@msgpack/msgpack";
 		
 	
-		async function getData() {
-			try{
-				const response = await fetch(url)
-				if (!response.ok) {
-					throw new Error(`${response.status}  ${response.statusText}`)
-				}
-				for await (const item of decodeArrayStream(response.body)) {
-					data.push(item)
-					if(data%10==0)
-						data=data
-				}
-				data=data
-				
-			}
-			catch(e){
-				console.error(e)
-				throw e
-			} 
+		function getData() {
+			data=[]
+			worker.postMessage(url)
 		}	
 
 		function doSort(event){
@@ -51,19 +36,23 @@
 				
 		}
 
-		let filter="", data=[], filtersOpen;
+		let filter="", data=[], filtersOpen=false;
+		const worker = new Worker("jsonstream.js",{ type: "module" }) 
 		const toggle =()=> filtersOpen=!filtersOpen
-		const url= "319184.mpk"	
 
-		const interval = 30*60000 //half hour
+		const interval = 3600000 //1 hour
 		const sorters={}
 		
 		const geeklist="319184"
+		const url = geeklist+".json"
 	   const base_url = "//www.boardgamegeek.com";
 
 		const intervalId=setInterval(()=>getData(),interval)
 		onDestroy(clearInterval(intervalId));
-		//document.documentElement.setAttribute('data-bs-theme', 'dark')
+		worker.onmessage = (e) => { // All messages from the worker must be dealt with like this
+			data.push(e.data)
+			data=data
+		};
 		getData()
  
 </script>
